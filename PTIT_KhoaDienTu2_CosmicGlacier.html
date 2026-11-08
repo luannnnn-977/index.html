@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTIT - KHOA KỸ THUẬT ĐIỆN TỬ 2 | COSMIC GLACIER PORTAL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js for 3D Cosmic Ice Earth -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --ptit-red: #E60012;
+            --ptit-red-glow: rgba(230, 0, 18, 0.7);
+            --ptit-crimson: #99000C;
+            --glacier-silver: #E2E8F0;
+            --glacier-ice: #93C5FD;
+            --ice-white: #FFFFFF;
+            --dark-space: #030308;
+            --glass-bg: rgba(12, 5, 8, 0.68);
+            --border-red-silver: rgba(230, 0, 18, 0.38);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--dark-space);
+            color: var(--ice-white);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 16px;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* WebGL Canvas for 3D Cosmic Glacier Earth */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Space & Ice Crystal Dust Overlay */
+        .space-grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            background: 
+                radial-gradient(circle at 18% 18%, rgba(230, 0, 18, 0.16) 0%, transparent 45%),
+                radial-gradient(circle at 82% 82%, rgba(147, 197, 253, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
+        }
+
+        /* Cosmic Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(25px);
+            background: rgba(10, 4, 6, 0.82);
+            border-bottom: 2px solid var(--border-red-silver);
+            box-shadow: 0 4px 35px rgba(230, 0, 18, 0.25), 0 0 15px rgba(255,255,255,0.1);
+            padding: 12px 36px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-block {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-decoration: none;
+        }
+
+        .logo-frame {
+            width: 58px;
+            height: 58px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 4px;
+            box-shadow: 0 0 25px var(--ptit-red-glow), 0 0 15px rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--ptit-red);
+            animation: cosmicBreath 3.5s infinite alternate;
+        }
+
+        .logo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        @keyframes cosmicBreath {
+            0% { transform: scale(1); box-shadow: 0 0 15px var(--ptit-red-glow); }
+            100% { transform: scale(1.06); box-shadow: 0 0 32px #ff2a40, 0 0 20px rgba(255,255,255,0.9); }
+        }
+
+        .brand-text-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 21px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #FFFFFF, var(--glacier-silver), var(--ptit-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .brand-text-header p {
+            font-size: 12px;
+            color: var(--glacier-silver);
+            letter-spacing: 2px;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(255,255,255,0.4);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(226, 232, 240, 0.25);
+            color: var(--ice-white);
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            letter-spacing: 1.2px;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: linear-gradient(135deg, var(--ptit-red), #ff334b);
+            border-color: #ffffff;
+            box-shadow: 0 0 28px var(--ptit-red-glow), 0 0 15px rgba(255,255,255,0.8);
+            transform: translateY(-2px);
+            color: #ffffff;
+        }
+
+        .main-container {
+            max-width: 1420px;
+            margin: 0 auto;
+            padding: 30px 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Hero Banner with Ice Earth 3D Theme */
+        .cosmic-hero {
+            background: linear-gradient(135deg, rgba(35, 7, 12, 0.88), rgba(8, 6, 12, 0.94));
+            border: 2px solid var(--border-red-silver);
+            border-left: 6px solid var(--ptit-red);
+            border-radius: 18px;
+            padding: 35px 42px;
+            margin-bottom: 35px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 35px rgba(230, 0, 18, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cosmic-hero::after {
+            content: "COSMIC PTIT";
+            position: absolute;
+            right: -20px;
+            bottom: -30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 100px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.025);
+            pointer-events: none;
+            line-height: 1;
+        }
+
+        .tag-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-ptit {
+            background: var(--ptit-red);
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 14px;
+            border-radius: 4px;
+            letter-spacing: 1.5px;
+            box-shadow: 0 0 15px var(--ptit-red-glow);
+        }
+
+        .badge-gsa {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid #ffffff;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 15px rgba(255,255,255,0.4);
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 12px;
+            text-shadow: 0 0 25px rgba(255,255,255,0.35);
+        }
+
+        .hero-title span {
+            background: linear-gradient(90deg, #FFFFFF, var(--glacier-ice), var(--ptit-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            color: var(--glacier-silver);
+            font-size: 16px;
+            line-height: 1.7;
+            max-width: 950px;
+            margin-bottom: 22px;
+        }
+
+        .hero-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .feat-box {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(226, 232, 240, 0.2);
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            transition: 0.3s;
+        }
+
+        .feat-box:hover {
+            border-color: var(--ptit-red);
+            box-shadow: 0 0 20px var(--ptit-red-glow);
+            transform: translateY(-2px);
+        }
+
+        .feat-box i {
+            font-size: 20px;
+            color: var(--ptit-red);
+            margin-top: 2px;
+            text-shadow: 0 0 12px var(--ptit-red-glow);
+        }
+
+        .feat-box strong {
+            display: block;
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .feat-box span {
+            font-size: 13.5px;
+            color: var(--glacier-silver);
+            line-height: 1.45;
+        }
+
+        /* HUD / Controller */
+        .hud-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-red-silver);
+            border-radius: 14px;
+            padding: 22px 30px;
+            margin-bottom: 32px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .select-unit {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .select-unit label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 800;
+        }
+
+        select.cyber-select {
+            background: #140508;
+            color: #ffffff;
+            border: 1.5px solid var(--ptit-red);
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+            box-shadow: 0 0 18px var(--ptit-red-glow);
+            transition: all 0.3s;
+        }
+
+        select.cyber-select:focus {
+            box-shadow: 0 0 28px #ff4d5a;
+            border-color: #ffffff;
+        }
+
+        .hud-numbers-group {
+            display: flex;
+            gap: 28px;
+        }
+
+        .hud-item {
+            text-align: center;
+            padding: 0 18px;
+            border-right: 1px solid rgba(226, 232, 240, 0.2);
+        }
+
+        .hud-item:last-child {
+            border-right: none;
+        }
+
+        .hud-val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            color: #ffffff;
+        }
+
+        .hud-val.correct { color: #00FF88; text-shadow: 0 0 16px rgba(0, 255, 136, 0.8); }
+        .hud-val.wrong { color: #FF2A42; text-shadow: 0 0 16px rgba(255, 42, 66, 0.8); }
+
+        .hud-lbl {
+            font-size: 11px;
+            color: var(--glacier-silver);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, var(--ptit-red), var(--ptit-crimson));
+            border: 1px solid #ffffff;
+            color: #ffffff;
+            padding: 11px 24px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 20px var(--ptit-red-glow);
+            transition: all 0.3s;
+        }
+
+        .btn-reset:hover {
+            box-shadow: 0 0 35px #ff4d5a;
+            transform: scale(1.04);
+        }
+
+        /* View Content */
+        .content-tab {
+            display: none;
+        }
+
+        .content-tab.active {
+            display: block;
+            animation: viewFade 0.35s ease-out;
+        }
+
+        @keyframes viewFade {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Question Stream */
+        .quiz-stream {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .q-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-red-silver);
+            border-radius: 14px;
+            padding: 26px 32px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(15px);
+            transition: border 0.3s;
+        }
+
+        .q-card:hover {
+            border-color: rgba(230, 0, 18, 0.65);
+        }
+
+        .q-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.15);
+        }
+
+        .q-idx {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--ptit-red);
+            text-shadow: 0 0 10px var(--ptit-red-glow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .q-badge {
+            font-size: 12px;
+            padding: 3px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--glacier-silver);
+            font-weight: 700;
+        }
+
+        .q-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .opt-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(226, 232, 240, 0.2);
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: var(--glacier-silver);
+            font-size: 16px;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .opt-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            color: #ffffff;
+            flex-shrink: 0;
+            transition: 0.2s;
+        }
+
+        .opt-item:hover:not(.locked) {
+            background: rgba(230, 0, 18, 0.16);
+            border-color: var(--ptit-red);
+            color: #ffffff;
+            transform: translateX(4px);
+        }
+
+        .opt-item:hover:not(.locked) .opt-letter {
+            background: var(--ptit-red);
+            box-shadow: 0 0 12px var(--ptit-red-glow);
+        }
+
+        .opt-item.is-correct {
+            background: rgba(0, 255, 136, 0.2) !important;
+            border-color: #00FF88 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.45);
+        }
+
+        .opt-item.is-correct .opt-letter {
+            background: #00FF88 !important;
+            color: #000000 !important;
+        }
+
+        .opt-item.is-wrong {
+            background: rgba(255, 42, 66, 0.25) !important;
+            border-color: #FF2A42 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 25px rgba(255, 42, 66, 0.45);
+        }
+
+        .opt-item.is-wrong .opt-letter {
+            background: #FF2A42 !important;
+            color: #ffffff !important;
+        }
+
+        .feedback-box {
+            display: none;
+            background: rgba(230, 0, 18, 0.09);
+            border-left: 4px solid var(--ptit-red);
+            border-radius: 0 10px 10px 0;
+            padding: 16px 20px;
+            margin-top: 14px;
+            animation: expandDown 0.3s ease-out;
+        }
+
+        @keyframes expandDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback-box.active {
+            display: block;
+        }
+
+        .verdict-line {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .verdict-line.correct { color: #00FF88; }
+        .verdict-line.wrong { color: #FF2A42; }
+
+        .exp-text {
+            font-size: 15px;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        /* Theory Cards Section */
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(390px, 1fr));
+            gap: 25px;
+        }
+
+        .theory-card {
+            background: linear-gradient(145deg, rgba(30, 6, 10, 0.82), rgba(12, 4, 8, 0.92));
+            border: 1px solid var(--border-red-silver);
+            border-radius: 14px;
+            padding: 26px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.6);
+            backdrop-filter: blur(15px);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theory-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--ptit-red), var(--glacier-silver));
+        }
+
+        .theory-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--ptit-red);
+            box-shadow: 0 15px 45px rgba(230, 0, 18, 0.3);
+        }
+
+        .theory-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 19px;
+            color: #ffffff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theory-card h3 i {
+            color: var(--ptit-red);
+            text-shadow: 0 0 12px var(--ptit-red-glow);
+        }
+
+        .theory-card p, .theory-card ul {
+            font-size: 15px;
+            color: var(--glacier-silver);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .theory-card ul {
+            padding-left: 20px;
+        }
+
+        .theory-card li {
+            margin-bottom: 6px;
+        }
+
+        .code-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px dashed var(--ptit-red);
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: #ffb3b8;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* Final Score Modal */
+        #score-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-card {
+            background: linear-gradient(145deg, #2b050a, #0e0204);
+            border: 2px solid var(--ptit-red);
+            border-radius: 18px;
+            width: 90%;
+            max-width: 530px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 60px var(--ptit-red-glow);
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-score {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 64px;
+            font-weight: 900;
+            color: #ffffff;
+            margin: 15px 0;
+            text-shadow: 0 0 35px var(--ptit-red-glow);
+        }
+
+        footer {
+            margin-top: 60px;
+            border-top: 2px solid var(--border-red-silver);
+            background: rgba(6, 2, 4, 0.96);
+            padding: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--glacier-silver);
+            position: relative;
+            z-index: 10;
+        }
+
+        footer strong {
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        @media (max-width: 900px) {
+            header {
+                flex-direction: column;
+                gap: 14px;
+                padding: 14px;
+            }
+            .hud-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .hud-numbers-group {
+                justify-content: space-around;
+            }
+            .hero-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D WebGL Canvas -->
+    <canvas id="webgl-canvas"></canvas>
+    <div class="space-grid-overlay"></div>
+
+    <!-- Header -->
+    <header>
+        <a href="#" class="brand-block">
+            <div class="logo-frame">
+                <img src="data:image/png;base64,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" alt="PTIT Logo">
+            </div>
+            <div class="brand-text-header">
+                <h1>HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG</h1>
+                <p>KHOA KỸ THUẬT ĐIỆN TỬ 2 &bull; COSMIC GLACIER PORTAL</p>
+            </div>
+        </a>
+        <div class="nav-actions">
+            <button class="nav-btn active" onclick="switchNav('quiz')">
+                <i class="fa-solid fa-gamepad"></i> 10 BỘ ĐỀ TRẮC NGHIỆM
+            </button>
+            <button class="nav-btn" onclick="switchNav('theory')">
+                <i class="fa-solid fa-microchip"></i> LÝ THUYẾT ĐIỆN TỬ 2
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+
+        <!-- Hero Showcase -->
+        <div class="cosmic-hero">
+            <div class="tag-row">
+                <span class="badge-ptit"><i class="fa-solid fa-graduation-cap"></i> KHOA KỸ THUẬT ĐIỆN TỬ 2</span>
+                <span class="badge-gsa"><i class="fa-brands fa-google"></i> Google Student Ambassador (GSA)</span>
+            </div>
+            <h2 class="hero-title">TÁC GIẢ: <span>NGUYỄN SỸ LUÂN</span></h2>
+            <p class="hero-desc">
+                Nguyễn Sỹ Luân là một sinh viên công nghệ tại Việt Nam, đồng thời là một <strong>Đại sứ Sinh viên Google (Google Student Ambassador - GSA)</strong>. Anh cũng là người sáng lập kênh học tập công nghệ và kỹ thuật mang tên <strong>SYLN LABS</strong> (hoặc kênh YouTube <em>SYLN</em>). Hệ thống trắc nghiệm và ôn luyện Điện Tử Công Suất được số hóa với không gian vũ trụ Trái Đất băng hà chuyển động 3D, tích hợp 10 mã đề chuẩn, tính điểm và giải thích trực tiếp.
+            </p>
+            <div class="hero-features-grid">
+                <div class="feat-box">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                    <div>
+                        <strong>Hoạt Động Chia Sẻ Công Nghệ</strong>
+                        <span>Tích cực lan tỏa kiến thức công nghệ và AI (hệ sinh thái Google & trợ lý AI Gemini) đến cộng đồng sinh viên kỹ thuật.</span>
+                    </div>
+                </div>
+                <div class="feat-box">
+                    <i class="fa-solid fa-compass-drafting"></i>
+                    <div>
+                        <strong>Dự Án SYLN LABS</strong>
+                        <span>Chuỗi thực hành kỹ thuật số, cơ điện tử, thiết kế cơ khí SolidWorks (SYLN LABS &times; GSA), mô phỏng mạch điện CadE-Simu và bài tập cổng tự động.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= QUIZ VIEW ================= -->
+        <div id="quiz-view" class="content-tab active">
+            <!-- HUD Control Bar -->
+            <div class="hud-panel">
+                <div class="select-unit">
+                    <label for="exam-select"><i class="fa-solid fa-layer-group" style="color:var(--ptit-red)"></i> CHỌN BỘ ĐỀ:</label>
+                    <select id="exam-select" class="cyber-select" onchange="loadExam(this.value)">
+                        <option value="1">ĐỀ THI 001 - PTIT KHOA ĐIỆN TỬ 2</option>
+                        <option value="2">ĐỀ THI 002 - PTIT KHOA ĐIỆN TỬ 2</option>
+                        <option value="3">ĐỀ THI 003 - PTIT KHOA ĐIỆN TỬ 2</option>
+                        <option value="4">ĐỀ THI 004 - PTIT KHOA ĐIỆN TỬ 2</option>
+                        <option value="5">ĐỀ THI 005 - PTIT KHOA ĐIỆN TỬ 2</option>
+                        <option value="6">ĐỀ THI 006 - PTIT KHOA ĐIỆN TỬ 2</option>
+                        <option value="7">ĐỀ THI 007 - PTIT KHOA ĐIỆN TỬ 2</option>
+                        <option value="8">ĐỀ THI 008 - PTIT KHOA ĐIỆN TỬ 2</option>
+                        <option value="9">ĐỀ THI 009 - PTIT KHOA ĐIỆN TỬ 2</option>
+                        <option value="10">ĐỀ THI 010 - PTIT KHOA ĐIỆN TỬ 2</option>
+                    </select>
+                </div>
+
+                <div class="hud-numbers-group">
+                    <div class="hud-item">
+                        <div class="hud-val" id="hud-total">50</div>
+                        <div class="hud-lbl">Tổng Số Câu</div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="hud-val correct" id="hud-correct">0</div>
+                        <div class="hud-lbl">Đúng</div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="hud-val wrong" id="hud-wrong">0</div>
+                        <div class="hud-lbl">Sai</div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="hud-val" id="hud-score" style="color:#ffffff">0.0</div>
+                        <div class="hud-lbl">Điểm (Hệ 10)</div>
+                    </div>
+                </div>
+
+                <div>
+                    <button class="btn-reset" onclick="resetCurrentExam()">
+                        <i class="fa-solid fa-arrows-rotate"></i> LÀM LẠI ĐỀ NÀY
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Questions Stream -->
+            <div id="quiz-questions-stream" class="quiz-stream"></div>
+        </div>
+
+        <!-- ================= THEORY VIEW ================= -->
+        <div id="theory-view" class="content-tab">
+            <div class="theory-grid">
+                <div class="theory-card">
+                    <h3><i class="fa-solid fa-bolt"></i> 1. Phân Loại Khóa Bán Dẫn</h3>
+                    <p>Khóa bán dẫn công suất trong chương trình Khoa Kỹ Thuật Điện Tử 2 được chia làm 2 nhánh chính:</p>
+                    <ul>
+                        <li><strong>Điều khiển bằng DÒNG:</strong> BJT, SCR, GTO. Đòi hỏi bơm dòng kích liên tục ở cực Base hoặc dòng mồi Gate.</li>
+                        <li><strong>Điều khiển bằng ÁP:</strong> MOSFET, IGBT, MCT. Trở kháng đầu vào cực Gate siêu cao nhờ màng cách điện $SiO_2$, tổn hao mạch lái cực thấp.</li>
+                    </ul>
+                    <div class="code-box">BJT: IC = &beta; &times; IB | MOSFET: VGS điều khiển kênh dẫn</div>
+                </div>
+
+                <div class="theory-card">
+                    <h3><i class="fa-solid fa-shield-virus"></i> 2. Vùng Làm Việc An Toàn (SOA)</h3>
+                    <p>Giới hạn khả năng chịu đựng của van bán dẫn trong mạch công suất:</p>
+                    <ul>
+                        <li><strong>Đường biên SOA:</strong> Giới hạn bởi dòng cực đại $I_{CM}$, áp đánh thủng $V_{(BR)CEO}$, và đường cong nhiệt $P = V_{CE} \times I_C$.</li>
+                        <li><strong>FBSOA (Forward Bias SOA):</strong> Giới hạn an toàn khi van đang mở dẫn dòng.</li>
+                        <li><strong>RBSOA (Reverse Bias SOA):</strong> Giới hạn an toàn khi van chuyển trạng thái tắt cưỡng bức dưới tải cảm ứng cao ($di/dt$, $dv/dt$).</li>
+                    </ul>
+                    <div class="code-box">Pmax = VCE &times; IC &le; (Tj,max - TC) / R&theta;JC</div>
+                </div>
+
+                <div class="theory-card">
+                    <h3><i class="fa-solid fa-atom"></i> 3. Họ Van Bán Dẫn 4 Lớp (P-N-P-N)</h3>
+                    <p>Các linh kiện công suất chịu dòng áp siêu lớn:</p>
+                    <ul>
+                        <li><strong>SCR (Thyristor):</strong> Mở khi $U_{AK} > 0$ và có xung dòng $I_G > 0$. Có tính chốt (latching); ngắt dòng Gate SCR vẫn dẫn. Tắt bằng cách giảm dòng Anode dưới mức dòng duy trì $I_H$.</li>
+                        <li><strong>TRIAC:</strong> Tương đương 2 SCR mắc song song ngược, dẫn dòng AC cả 2 bán kỳ âm và dương.</li>
+                        <li><strong>GTO:</strong> Khóa được bằng xung dòng âm lớn rút khỏi Gate.</li>
+                        <li><strong>IGCT:</strong> Tích hợp driver tốc độ cao áp sát phiến silicon, giảm cảm kháng ký sinh.</li>
+                        <li><strong>MCT:</strong> Kết hợp khả năng tải lớn của Thyristor với cổng điều khiển bằng điện áp của MOSFET.</li>
+                    </ul>
+                </div>
+
+                <div class="theory-card">
+                    <h3><i class="fa-solid fa-wave-square"></i> 4. Dòng Phục Hồi Ngược & Mạch Snubber</h3>
+                    <p>Hiện tượng chuyển mạch tần số cao trong công nghiệp:</p>
+                    <ul>
+                        <li><strong>Dòng $I_{rr}$ (Reverse Recovery):</strong> Khi diode đang dẫn bị ép ngắt đột ngột, điện tích thiểu số tích tụ phải xả ngược lại tạo dòng âm $I_{rr}$, sinh tổn hao chuyển mạch và nhiễu EMI cao tần.</li>
+                        <li><strong>Diode Fast Recovery (FRD):</strong> Thời gian $t_{rr}$ siêu ngắn (&lt;100ns), chuyên dùng cho Inverter, Snubber và nguồn xung SMPS.</li>
+                        <li><strong>Mạch Snubber RC:</strong> Mắc song song khóa van để hấp thụ năng lượng tự cảm $L(di/dt)$, làm chậm sườn dốc $dv/dt$, chống đánh thủng linh kiện.</li>
+                    </ul>
+                </div>
+
+                <div class="theory-card">
+                    <h3><i class="fa-solid fa-chart-line"></i> 5. Đo Lường Điện & Sóng Hài (THD)</h3>
+                    <p>Các chỉ số đánh giá chất lượng nguồn điện:</p>
+                    <ul>
+                        <li><strong>Trị hiệu dụng (RMS):</strong> Đại diện cho công suất tỏa nhiệt $I^2Rt$ trên điện trở tải R. Các thiết bị bảo vệ như rơ-le nhiệt đọc giá trị RMS để bảo vệ cháy nổ.</li>
+                        <li><strong>Trị trung bình (Average):</strong> Tích phân sóng sin toàn chu kỳ bằng 0. Với sóng PWM: $V_{avg} = D \times V_{peak}$ ($D$: Duty Cycle).</li>
+                        <li><strong>Hệ số công suất:</strong> $PF = P / S$. Với tải phi tuyến, $PF < 1$ do sóng dòng bị méo dạng.</li>
+                        <li><strong>THD (Total Harmonic Distortion):</strong> Độ méo dạng sóng hài tổng hợp. Bộ lọc LC / LCL giúp lọc sạch sóng hài bậc cao do băm xung PWM.</li>
+                    </ul>
+                    <div class="code-box">Sóng hài bậc 3 của lưới 50Hz: f3 = 3 &times; 50Hz = 150Hz</div>
+                </div>
+
+                <div class="theory-card">
+                    <h3><i class="fa-solid fa-network-wired"></i> 6. Mạch Biến Đổi & Bù Tụ Điện</h3>
+                    <p>Ứng dụng thực tế trong hệ thống kỹ thuật điện tử 2:</p>
+                    <ul>
+                        <li><strong>Chỉnh Lưu (AC-DC):</strong> Dùng Diode / Thyristor chuyển xoay chiều thành một chiều.</li>
+                        <li><strong>Nghịch Lưu (DC-AC):</strong> Dùng biến tần IGBT băm xung PWM điều khiển tốc độ động cơ.</li>
+                        <li><strong>Bù công suất phản kháng:</strong> Tải cảm (động cơ, biến áp) làm dòng trễ pha so với điện áp. Mắc song song dàn tụ bù điện (tính dung, dòng vượt pha) để trung hòa công suất phản kháng $Q$, kéo $PF \approx 1$.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Final Results -->
+    <div id="score-modal">
+        <div class="modal-card">
+            <h2 style="font-family:'Orbitron'; color:var(--ptit-red); font-size: 24px;">KHOA KỸ THUẬT ĐIỆN TỬ 2</h2>
+            <p style="color:var(--glacier-silver); margin-top: 8px;">KẾT QUẢ ĐÁNH GIÁ TRẮC NGHIỆM</p>
+            <div class="modal-score" id="modal-score-display">9.2</div>
+            <p id="modal-desc" style="font-size: 16px; margin-bottom: 24px; color: #ffffff;"></p>
+            <button class="btn-reset" onclick="closeModal()">
+                <i class="fa-solid fa-check"></i> XEM LẠI BÀI LÀM
+            </button>
+        </div>
+    </div>
+
+    <footer>
+        <p>HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG - <strong>KHOA KỸ THUẬT ĐIỆN TỬ 2</strong></p>
+        <p style="margin-top: 6px;">Phát triển & Xây dựng bởi <strong>Nguyễn Sỹ Luân</strong> (Google Student Ambassador - Founder SYLN LABS) &copy; 2026.</p>
+    </footer>
+
+    <!-- Three.js Cosmic Glacier Earth Background Script -->
+    <script>
+        const canvas = document.getElementById('webgl-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Procedural Glacier Earth Texture
+        function createGlacierEarthTexture() {
+            const size = 1024;
+            const c = document.createElement('canvas');
+            c.width = size;
+            c.height = size;
+            const ctx = c.getContext('2d');
+
+            // Deep cosmic ocean with ice freeze
+            ctx.fillStyle = '#060a16';
+            ctx.fillRect(0, 0, size, size);
+
+            // Polar Ice Caps
+            const gradTop = ctx.createLinearGradient(0, 0, 0, size * 0.28);
+            gradTop.addColorStop(0, '#ffffff');
+            gradTop.addColorStop(0.6, '#b0d9f8');
+            gradTop.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradTop;
+            ctx.fillRect(0, 0, size, size * 0.28);
+
+            const gradBot = ctx.createLinearGradient(0, size, 0, size * 0.72);
+            gradBot.addColorStop(0, '#ffffff');
+            gradBot.addColorStop(0.6, '#b0d9f8');
+            gradBot.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradBot;
+            ctx.fillRect(0, size * 0.72, size, size * 0.28);
+
+            // Continents with frozen glacial crust & subtle PTIT crimson energy veins
+            for (let i = 0; i < 40; i++) {
+                const cx = Math.random() * size;
+                const cy = size * 0.25 + Math.random() * size * 0.5;
+                const rad = 40 + Math.random() * 80;
+
+                const gradLand = ctx.createRadialGradient(cx, cy, 5, cx, cy, rad);
+                gradLand.addColorStop(0, '#e8f2fc');
+                gradLand.addColorStop(0.4, '#8eb8de');
+                gradLand.addColorStop(0.8, '#263a56');
+                gradLand.addColorStop(1, 'transparent');
+
+                ctx.fillStyle = gradLand;
+                ctx.beginPath();
+                ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Red Cosmic Energy Pulse Grid
+            ctx.strokeStyle = 'rgba(230, 0, 18, 0.25)';
+            ctx.lineWidth = 1.5;
+            for (let y = size * 0.2; y <= size * 0.8; y += 45) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(size, y);
+                ctx.stroke();
+            }
+
+            return new THREE.CanvasTexture(c);
+        }
+
+        // Earth Sphere
+        const earthGeo = new THREE.SphereGeometry(2.3, 64, 64);
+        const earthMat = new THREE.MeshPhongMaterial({
+            map: createGlacierEarthTexture(),
+            bumpScale: 0.05,
+            specular: new THREE.Color(0xdbeafe),
+            shininess: 25
+        });
+        const earthMesh = new THREE.Mesh(earthGeo, earthMat);
+        scene.add(earthMesh);
+
+        // Frozen Atmosphere Glow Shell
+        const atmoGeo = new THREE.SphereGeometry(2.38, 64, 64);
+        const atmoMat = new THREE.MeshBasicMaterial({
+            color: 0x93c5fd,
+            transparent: true,
+            opacity: 0.18,
+            side: THREE.BackSide
+        });
+        const atmoMesh = new THREE.Mesh(atmoGeo, atmoMat);
+        scene.add(atmoMesh);
+
+        // Orbiting Cosmic Rings (Silver & PTIT Crimson)
+        const ringGeo1 = new THREE.RingGeometry(3.1, 3.25, 64);
+        const ringMat1 = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.35
+        });
+        const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
+        ring1.rotation.x = Math.PI / 2.3;
+        ring1.rotation.y = Math.PI / 6;
+        scene.add(ring1);
+
+        const ringGeo2 = new THREE.RingGeometry(3.6, 3.7, 64);
+        const ringMat2 = new THREE.MeshBasicMaterial({
+            color: 0xE60012,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.45
+        });
+        const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
+        ring2.rotation.x = Math.PI / 2.1;
+        ring2.rotation.y = -Math.PI / 7;
+        scene.add(ring2);
+
+        // Cosmic Starfield & Ice Debris
+        const starsCount = 1200;
+        const starsGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(starsCount * 3);
+        const colors = new Float32Array(starsCount * 3);
+
+        for (let i = 0; i < starsCount * 3; i += 3) {
+            positions[i] = (Math.random() - 0.5) * 50;
+            positions[i + 1] = (Math.random() - 0.5) * 50;
+            positions[i + 2] = (Math.random() - 0.5) * 50;
+
+            const isRed = Math.random() < 0.22;
+            if (isRed) {
+                colors[i] = 1.0;
+                colors[i + 1] = 0.1;
+                colors[i + 2] = 0.2;
+            } else {
+                colors[i] = 0.9;
+                colors[i + 1] = 0.95;
+                colors[i + 2] = 1.0;
+            }
+        }
+
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        starsGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const starsMat = new THREE.PointsMaterial({
+            size: 0.12,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.85
+        });
+        const starField = new THREE.Points(starsGeo, starsMat);
+        scene.add(starField);
+
+        // Lighting
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1.4);
+        sunLight.position.set(5, 3, 5);
+        scene.add(sunLight);
+
+        const ambientLight = new THREE.AmbientLight(0x2a1018, 0.85);
+        scene.add(ambientLight);
+
+        const crimsonRimLight = new THREE.PointLight(0xE60012, 2.5, 20);
+        crimsonRimLight.position.set(-6, -2, -4);
+        scene.add(crimsonRimLight);
+
+        camera.position.set(0, 0, 6.2);
+
+        // Parallax and responsive animation
+        let mouseX = 0;
+        let mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth - 0.5) * 0.4;
+            mouseY = (e.clientY / window.innerHeight - 0.5) * 0.4;
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+
+            earthMesh.rotation.y += 0.0025;
+            atmoMesh.rotation.y += 0.0028;
+            ring1.rotation.z += 0.0015;
+            ring2.rotation.z -= 0.0012;
+            starField.rotation.y += 0.0004;
+
+            camera.position.x += (mouseX - camera.position.x) * 0.04;
+            camera.position.y += (-mouseY - camera.position.y) * 0.04;
+            camera.lookAt(scene.position);
+
+            renderer.render(scene, camera);
+        }
+        animate3D();
+
+        // 50 Questions Database
+        const questionsBank = [
+            {
+                q: "Trị trung bình của một tín hiệu sóng sin toàn chu kỳ là bao nhiêu?",
+                opts: ["0", "Vm/√2", "2Vm/π", "Vm"],
+                ans: 0,
+                exp: "Sóng sin toàn chu kỳ có diện tích phần dương và phần âm bằng nhau, do đó tích phân toàn chu kỳ bằng 0, dẫn đến trị trung bình bằng 0."
+            },
+            {
+                q: "Trị hiệu dụng (RMS) dùng để xác định đại lượng nào?",
+                opts: ["Giá trị cực đại", "Giá trị trung bình", "Giá trị DC tương đương tạo ra cùng lượng nhiệt", "Biên độ đỉnh-đỉnh"],
+                ans: 2,
+                exp: "Trị hiệu dụng (Root Mean Square) là giá trị điện áp hoặc dòng điện một chiều (DC) tương đương sinh ra cùng một lượng nhiệt năng trên điện trở R trong cùng một khoảng thời gian."
+            },
+            {
+                q: "Hệ số công suất (PF) được tính bằng công thức nào?",
+                opts: ["P × S", "P / S", "S / P", "Q / S"],
+                ans: 1,
+                exp: "Hệ số công suất (Power Factor - PF) là tỷ số giữa công suất thực (P - tính bằng W) và công suất biểu kiến (S - tính bằng VA), công thức: PF = P / S."
+            },
+            {
+                q: "Với tải phi tuyến (như chỉnh lưu, biến tần), hệ số công suất thường có giá trị như thế nào?",
+                opts: ["PF = 1", "PF < 1 do méo dạng sóng", "PF > 1", "PF = 0"],
+                ans: 1,
+                exp: "Tải phi tuyến sinh ra sóng hài làm dòng điện bị méo dạng không còn hình sin chuẩn, làm tăng công suất biểu kiến S dẫn đến PF < 1."
+            },
+            {
+                q: "Nhiễu dẫn (conducted EMI) lây lan qua môi trường nào?",
+                opts: ["Qua không gian", "Qua các đường dây dẫn/dây nguồn", "Qua bức xạ nhiệt", "Qua ánh sáng"],
+                ans: 1,
+                exp: "Nhiễu điện từ (EMI) gồm 2 dạng: Nhiễu bức xạ (Radiated) lan truyền qua không gian, và Nhiễu dẫn (Conducted) truyền ngược qua các đường dây điện nguồn."
+            },
+            {
+                q: "Nguyên nhân chính sinh ra nhiễu EMI trong các bộ biến đổi công suất là gì?",
+                opts: ["Tải thuần trở", "Tốc độ đóng cắt chậm", "Quá trình đóng cắt nhanh (di/dt, dv/dt rất cao)", "Tần số lưới 50Hz"],
+                ans: 2,
+                exp: "Các linh kiện bán dẫn (MOSFET, IGBT) bật tắt ở tần số cao tạo ra sự biến thiên dòng điện (di/dt) và điện áp (dv/dt) khổng lồ, phát sinh nhiễu EMI tần số cao."
+            },
+            {
+                q: "Chỉ số THD (Total Harmonic Distortion) dùng để đánh giá điều gì?",
+                opts: ["Độ bền của linh kiện", "Tổng độ méo dạng sóng hài", "Công suất tiêu thụ", "Độ ồn của động cơ"],
+                ans: 1,
+                exp: "THD là chỉ số đánh giá mức độ tín hiệu bị biến dạng so với sóng sin lý tưởng ban đầu do sự xuất hiện của các thành phần sóng hài."
+            },
+            {
+                q: "Sóng vuông PWM có duty cycle = 30% có trị trung bình như thế nào so với khi duty cycle = 80% (cùng biên độ)?",
+                opts: ["Lớn hơn", "Nhỏ hơn", "Bằng nhau", "Bằng 0"],
+                ans: 1,
+                exp: "Trị trung bình của sóng PWM tỷ lệ thuận với Duty Cycle (Vavg = D × Vpeak). Do đó Duty = 30% sẽ có trị trung bình nhỏ hơn Duty = 80%."
+            },
+            {
+                q: "Biện pháp nào sau đây giúp cải thiện hệ số công suất cho tải cảm?",
+                opts: ["Mắc song song tụ bù điện", "Bù cuộn cảm nối tiếp", "Tăng điện trở tải", "Giảm điện áp nguồn"],
+                ans: 0,
+                exp: "Tải cảm sinh công suất phản kháng trễ pha, mắc song song tụ điện (sinh công suất phản kháng tính dung vượt pha) giúp triệt tiêu Q, nâng PF lên xấp xỉ 1."
+            },
+            {
+                q: "Thiết bị nào sau đây KHÔNG phải là nguồn gây ra sóng hài?",
+                opts: ["Nguồn xung (SMPS)", "Biến tần động cơ", "Động cơ DC chổi than", "Lò sưởi thuần trở (Điện trở nhiệt)"],
+                ans: 3,
+                exp: "Lò sưởi thuần trở là tải tuyến tính lý tưởng, dòng điện biến thiên hoàn toàn tỷ lệ thuận với điện áp theo định luật Ohm nên không sinh sóng hài."
+            },
+            {
+                q: "Để giảm thiểu sóng hài bậc cao sinh ra do đóng cắt PWM, người ta thường dùng giải pháp nào?",
+                opts: ["Bộ lọc thụ động LC / LCL", "Tăng tần số lưới điện", "Dùng dây dẫn nhỏ", "Tăng độ tự cảm của tải"],
+                ans: 0,
+                exp: "Mạch lọc LC hoặc LCL đóng vai trò lọc thông thấp (low-pass filter) được lắp ở đầu ra inverter để là phẳng dạng sóng sin, loại bỏ các tần số sóng hài đóng cắt."
+            },
+            {
+                q: "Mạch R-L có dòng điện trễ pha so với điện áp sẽ dẫn đến công suất tức thời p(t) có đặc điểm gì?",
+                opts: ["Luôn dương", "Luôn âm", "Có những khoảng thời gian mang giá trị âm", "Bằng 0"],
+                ans: 2,
+                exp: "Do góc lệch pha, có những thời điểm u(t) và i(t) trái dấu nhau, tạo ra các chu kỳ p(t) = u(t) × i(t) mang giá trị âm (trả năng lượng từ trường về nguồn)."
+            },
+            {
+                q: "SOA (Safe Operating Area) của transistor là gì?",
+                opts: ["Vùng hoạt động an toàn giới hạn bởi dòng điện và điện áp", "Khu vực đặt quạt tản nhiệt", "Vùng điện áp điều khiển cực G", "Vùng tuyến tính khuếch đại"],
+                ans: 0,
+                exp: "SOA là biểu đồ giới hạn không gian tọa độ dòng IC và điện áp VCE mà tại đó transistor có thể đóng cắt liên tục mà không bị phá hủy nhiệt hay đánh thủng thứ cấp."
+            },
+            {
+                q: "Phương trình đường giới hạn công suất nhiệt tối đa trên đồ thị SOA là gì?",
+                opts: ["P = VCE + IC", "P = VCE × IC", "P = IC² × R", "P = VCE² / IC"],
+                ans: 1,
+                exp: "Đường giới hạn công suất tiêu tán nhiệt tối đa trên SOA là đường hyperbol tuân theo định luật nhiệt: P = VCE × IC = hằng số."
+            },
+            {
+                q: "FBSOA và RBSOA là các chế độ vùng hoạt động an toàn khi linh kiện ở trạng thái nào?",
+                opts: ["FBSOA khi Dẫn dòng, RBSOA khi Tắt cưỡng bức", "FBSOA khi Tắt, RBSOA khi Dẫn", "Cả 2 đều khi Tắt", "Cả 2 đều khi Dẫn"],
+                ans: 0,
+                exp: "FBSOA (Forward Bias SOA) áp dụng khi van đang mở dẫn, còn RBSOA (Reverse Bias SOA) áp dụng khi khóa van chịu quá áp tự cảm cực đại từ tải cảm ứng."
+            },
+            {
+                q: "Khi nhiệt độ mối nối (Tj) tăng cao, khả năng chịu đựng công suất của linh kiện bán dẫn sẽ:",
+                opts: ["Không đổi", "Tăng lên", "Giảm xuống (Derating)", "Tiến tới vô cực"],
+                ans: 2,
+                exp: "Nhiệt độ mối nối Tj càng cao thì khả năng tản nhiệt ra vỏ càng kém, bắt buộc phải giảm tải công suất chịu đựng (derated) để chống cháy mối nối P-N."
+            },
+            {
+                q: "Diode Fast Recovery (FRD) thường được sử dụng ở vị trí nào trong mạch?",
+                opts: ["Chỉnh lưu lưới 50Hz", "Mạch Inverter và Snubber tần số cao", "Bảo vệ quá dòng nguồn", "Mạch lọc âm tần"],
+                ans: 1,
+                exp: "Diode Fast Recovery có thời gian phục hồi ngược trr siêu ngắn (vài chục ns) nên chuyên dùng làm diode dập ngược (freewheeling) trong Inverter và Snubber tần số cao."
+            },
+            {
+                q: "Hiện tượng phục hồi ngược (Reverse Recovery) ở Diode là gì?",
+                opts: ["Dòng điện tăng vọt khi mở van", "Xuất hiện dòng ngược Irr do điện tích thiểu số chưa xả hết khi ngắt", "Đánh thủng diode vĩnh viễn", "Sụt áp thuận quá mức"],
+                ans: 1,
+                exp: "Khi phân cực ngược đột ngột trong lúc đang dẫn, các điện tích thiểu số tích tụ ở vùng tiếp giáp P-N phải xả ngược lại tạo dòng Irr trong thời gian trr."
+            },
+            {
+                q: "Tác hại chính của dòng phục hồi ngược Irr là gì?",
+                opts: ["Gây tổn hao chuyển mạch và phát sinh nhiễu EMI cao tần", "Làm giảm dòng điện tải", "Tăng hệ số công suất mạch", "Bảo vệ mạch ngắn mạch"],
+                ans: 0,
+                exp: "Dòng Irr sinh tổn hao nhiệt trực tiếp trong quá trình chuyển mạch và tạo ra xung điện áp tự cảm cao kèm nhiễu bức xạ điện từ (EMI) nghiêm trọng."
+            },
+            {
+                q: "Mạch Snubber RC mắc song song với linh kiện đóng cắt nhằm mục đích gì?",
+                opts: ["Tăng công suất tải", "Bảo vệ chống quá áp và giảm tốc độ tăng áp dv/dt khi ngắt tải cảm", "Lọc điện áp DC", "Cách ly tín hiệu lái"],
+                ans: 1,
+                exp: "Mạch Snubber RC tạo nhánh xả cho dòng điện cảm ứng nạp vào tụ C, làm giảm dốc điện áp dv/dt và kẹp đỉnh xung quá áp bảo vệ van bán dẫn."
+            },
+            {
+                q: "BJT là linh kiện điều khiển bằng đại lượng nào?",
+                opts: ["Điện áp", "Dòng điện (dòng cực Base)", "Tần số", "Từ trường"],
+                ans: 1,
+                exp: "BJT là linh kiện lưỡng cực điều khiển bằng dòng điện: dòng điện nhỏ kích vào cực Base (IB) khuếch đại dòng điện qua cực Collector (IC = β × IB)."
+            },
+            {
+                q: "Để BJT hoạt động như một khóa đóng (vùng bão hòa), dòng điện cực B phải đáp ứng điều kiện gì?",
+                opts: ["IB = 0", "IB đủ lớn (sử dụng hệ số bão hòa kbh từ 1.2 - 1.5)", "IB = IC", "IB mang giá trị âm"],
+                ans: 1,
+                exp: "Để BJT bão hòa hoàn toàn với điện áp rơi VCE(sat) cực nhỏ, người ta bơm dòng IB lớn hơn giá trị tính toán lý thuyết bằng hệ số bão hòa kbh."
+            },
+            {
+                q: "Mục đích của việc sử dụng Sơ đồ ghép Darlington trong mạch BJT là gì?",
+                opts: ["Tăng điện áp chịu đựng", "Tăng mạnh hệ số khuếch đại dòng tổng (β = β1 × β2)", "Giảm dòng rò", "Tăng tần số đóng cắt"],
+                ans: 1,
+                exp: "BJT công suất có hệ số β khá thấp. Bằng cách nối tầng 2 BJT theo sơ đồ Darlington, hệ số khuếch đại tổng bằng tích β1 × β2, dùng dòng lái rất nhỏ vẫn mở được tải lớn."
+            },
+            {
+                q: "Transistor trường MOSFET được điều khiển đóng cắt bằng đại lượng nào?",
+                opts: ["Dòng điện", "Nhiệt độ mối nối", "Điện áp cấp tại cực Gate (VGS)", "Góc kích pha"],
+                ans: 2,
+                exp: "Cực Gate của MOSFET được cách ly điện hoàn toàn bởi lớp SiO2 (tương đương bản tụ), do đó nó được điều khiển bằng Điện áp và tiêu thụ công suất tĩnh bằng 0."
+            },
+            {
+                q: "So với BJT, MOSFET có ưu điểm nổi bật nào trong ứng dụng công suất?",
+                opts: ["Chịu được dòng cực lớn, tốc độ chậm", "Đóng cắt siêu nhanh, tổn hao công suất điều khiển cực thấp", "Điều khiển bằng dòng lớn", "Không có điện trở dẫn"],
+                ans: 1,
+                exp: "Do là linh kiện hạt dẫn đa số (không có thời gian trữ điện tích thiểu số) và điều khiển bằng áp, MOSFET đóng cắt ở tần số cực cao (lên đến MHz) với công suất lái rất nhỏ."
+            },
+            {
+                q: "Thyristor (SCR) bao gồm bao nhiêu lớp bán dẫn ghép nối tiếp nhau?",
+                opts: ["2 lớp (P-N)", "3 lớp (P-N-P)", "4 lớp (P-N-P-N)", "5 lớp"],
+                ans: 2,
+                exp: "SCR là linh kiện 4 lớp bán dẫn P-N-P-N xen kẽ, tạo nên 3 tiếp giáp P-N bên trong, hoạt động tương đương cặp transistor PNP và NPN hồi tiếp chéo."
+            },
+            {
+                q: "Điều kiện cần và đủ để kích mở dẫn một Thyristor (SCR) là gì?",
+                opts: ["UAK < 0 và có xung IG", "UAK > 0 và đồng thời cấp một xung dòng điện dương IG vào cực Gate", "Chỉ cần UAK > 0", "Chỉ cần xung IG > 0"],
+                ans: 1,
+                exp: "SCR chỉ mở khi được phân cực thuận (Anode dương hơn Cathode) và nhận được một xung mồi dòng điện dương đủ lớn vào cổng Gate."
+            },
+            {
+                q: "Sau khi Thyristor (SCR) đã dẫn, nếu ngắt dòng điều khiển IG thì linh kiện sẽ ra sao?",
+                opts: ["Khóa lại ngay lập tức", "Giảm một nửa dòng tải", "Vẫn tiếp tục dẫn dòng điện bình thường", "Bị đánh thủng mối nối"],
+                ans: 2,
+                exp: "SCR có tính chất 'chốt' (latching): Khi vòng phản hồi nội đã dẫn bão hòa, ngắt tín hiệu mồi Gate sẽ không làm SCR tắt."
+            },
+            {
+                q: "Làm thế nào để khóa (tắt) một Thyristor (SCR) đang dẫn trong mạch điện một chiều (DC)?",
+                opts: ["Cấp xung âm vào cực G", "Ép dòng điện qua Anode giảm xuống dưới mức dòng duy trì (IH) hoặc đặt áp ngược", "Tăng dòng cực G", "Tăng điện áp UAK"],
+                ans: 1,
+                exp: "Cổng Gate của SCR thông thường không thể ngắt van. Muốn tắt SCR trong mạch DC, phải cắt dòng chính Anode dưới dòng duy trì IH hoặc dùng mạch chuyển mạch cưỡng bức đảo áp."
+            },
+            {
+                q: "Linh kiện TRIAC có cấu tạo và nguyên lý hoạt động tương đương với sơ đồ nào?",
+                opts: ["Hai Diode mắc nối tiếp", "Hai Thyristor (SCR) mắc song song ngược chiều", "Hai BJT ghép Darlington", "Một MOSFET ghép với một Diode"],
+                ans: 1,
+                exp: "TRIAC tương đương với 2 cấu trúc Thyristor mắc song song ngược chiều nhau có chung một cổng Gate, cho phép dòng điện xoay chiều AC đi qua cả 2 hướng."
+            },
+            {
+                q: "Khác với SCR, TRIAC có khả năng đặc biệt nào sau đây?",
+                opts: ["Dẫn dòng điện theo cả hai chiều bán kỳ dương và âm", "Tự động tắt khi quá nhiệt", "Đóng cắt tần số MHz", "Không cần xung kích mồi"],
+                ans: 0,
+                exp: "TRIAC là van bán dẫn điều khiển 2 chiều, có thể kích dẫn ở cả bán kỳ dương lẫn bán kỳ âm của điện xoay chiều, rất phổ biến trong mạch Dimmer quạt/đèn."
+            },
+            {
+                q: "GTO (Gate Turn-Off Thyristor) có ưu điểm vượt trội gì so với SCR truyền thống?",
+                opts: ["Dẫn điện hai chiều", "Có thể chủ động TẮT van bằng cách rút xung dòng âm lớn ra khỏi cực Gate", "Không cần tản nhiệt", "Điều khiển hoàn toàn bằng điện áp"],
+                ans: 1,
+                exp: "GTO khắc phục nhược điểm của SCR: Cho phép ngắt van cưỡng bức trực tiếp bằng cách rút một xung dòng điện âm có biên độ lớn qua cực Gate."
+            },
+            {
+                q: "IGCT là viết tắt của linh kiện công suất nào sau đây?",
+                opts: ["Integrated Gate-Commutated Thyristor", "Insulated Gate Control Transistor", "Internal Gate Circuit Thyristor", "Isolated Gate Commutated Triac"],
+                ans: 0,
+                exp: "IGCT là viết tắt của 'Integrated Gate-Commutated Thyristor' - thế hệ Thyristor công suất đỉnh cao tích hợp driver Gate tốc độ cao."
+            },
+            {
+                q: "Đặc điểm nổi bật của IGCT so với GTO truyền thống là gì?",
+                opts: ["Chỉ dẫn điện 1 chiều", "Tích hợp sẵn bo mạch driver kích Gate cực nhanh giúp giảm điện cảm ký sinh", "Không thể tắt bằng cực Gate", "Chịu dòng điện thấp hơn"],
+                ans: 1,
+                exp: "IGCT tích hợp trực tiếp bo mạch lái Gate siêu nhanh áp sát phiến bán dẫn, triệt tiêu điện cảm ký sinh và tăng tốc độ khóa ngắt gấp nhiều lần GTO."
+            },
+            {
+                q: "Linh kiện MCT (MOS-Controlled Thyristor) là sự lai ghép công nghệ giữa:",
+                opts: ["Diode và BJT", "Thyristor và TRIAC", "Thyristor (SCR) và cấu trúc cổng MOSFET", "IGBT và Diode"],
+                ans: 2,
+                exp: "MCT tích hợp sức mạnh dẫn dòng lớn, sụt áp thuận cực thấp của Thyristor với cổng điều khiển đóng ngắt bằng điện áp siêu tiện lợi của MOSFET."
+            },
+            {
+                q: "Phương pháp điều khiển đóng và ngắt linh kiện MCT là gì?",
+                opts: ["Bằng xung dòng điện lớn", "Bằng điện áp đặt vào cực Gate (nhờ cấu trúc MOSFET nội bộ)", "Bằng ánh sáng quang", "Bằng rơ-le tiếp điểm"],
+                ans: 1,
+                exp: "MCT chỉ cần cấp điện áp vào cực Gate: điện áp này bật các MOSFET nội bộ bên trong chip để kích mồi hoặc ép ngắt khối Thyristor chịu tải."
+            },
+            {
+                q: "Thông số điện trở nhiệt RθJC trong datasheet của linh kiện bán dẫn biểu thị điều gì?",
+                opts: ["Điện trở bảo vệ", "Mức cản trở nhiệt truyền từ mối nối (Junction) ra vỏ (Case)", "Điện trở rò ngược", "Điện trở tải"],
+                ans: 1,
+                exp: "RθJC đo lường mức độ cản trở nhiệt từ lõi tinh thể silicon (Junction) truyền ra lớp vỏ kim loại/nhựa (Case). RθJC càng nhỏ thì tản nhiệt càng tốt."
+            },
+            {
+                q: "Trong cấu tạo của MOSFET, lớp màng SiO2 có tác dụng gì?",
+                opts: ["Tăng khả năng dẫn điện", "Cách điện tuyệt đối giữa cực Gate kim loại và kênh dẫn bán dẫn", "Tản nhiệt cho linh kiện", "Phát sáng khi có dòng chạy qua"],
+                ans: 1,
+                exp: "Lớp Silicon Dioxide (SiO2) là một màng điện môi cách điện hoàn hảo, biến cực Gate thành một bản cực tụ điện, ngăn dòng rò đi qua cổng điều khiển."
+            },
+            {
+                q: "Điện áp Breakover Voltage (UBO) của Thyristor là gì?",
+                opts: ["Điện áp duy trì", "Điện áp đánh thủng thuận mà van tự dẫn khi KHÔNG CÓ xung mồi Gate", "Điện áp đánh thủng ngược", "Điện áp điều khiển cực G"],
+                ans: 1,
+                exp: "UBO là ngưỡng điện áp thuận mà nếu điện áp Anode-Cathode bị ép vượt quá mức này, Thyristor sẽ tự động đánh thủng và dẫn điện ngoài ý muốn (nguy hiểm)."
+            },
+            {
+                q: "Tụ bù công suất phản kháng được lắp đặt trong nhà máy chủ yếu nhằm mục đích:",
+                opts: ["Tăng điện trở của tải", "Bù công suất phản kháng cho tải cảm (động cơ), nâng cao hệ số công suất PF", "Lọc sóng hài bậc cao", "Giảm điện áp lưới"],
+                ans: 1,
+                exp: "Tụ điện sinh công suất phản kháng dung kháng (dòng vượt pha áp) để bù trực tiếp lượng cảm kháng trễ pha của động cơ, kéo góc lệch pha về 0 và tăng PF."
+            },
+            {
+                q: "Trong bộ biến đổi AC-DC, Diode chỉnh lưu chuẩn (Standard Recovery) thường làm việc ở tần số nào?",
+                opts: ["Tần số lưới điện công nghiệp (50/60 Hz)", "Tần số sóng vô tuyến (MHz)", "Tần số băm xung PWM (kHz)", "Tần số âm tần"],
+                ans: 0,
+                exp: "Diode chỉnh lưu chuẩn có thời gian hồi phục ngược trr lớn (vài micro-giây) nên chỉ phù hợp hoạt động ở lưới điện tần số thấp 50Hz hoặc 60Hz."
+            },
+            {
+                q: "Khi dòng kích mồi IG của SCR càng lớn thì điện áp đánh thủng thuận UBO sẽ:",
+                opts: ["Tăng lên", "Giảm xuống đáng kể", "Không thay đổi", "Tiến tới vô cực"],
+                ans: 1,
+                exp: "Dòng IG càng lớn thì mật độ hạt tải mồi càng cao, làm ngưỡng điện áp cần thiết để van chuyển sang trạng thái dẫn (UBO) tụt giảm xuống mức an toàn."
+            },
+            {
+                q: "Trong mạch băm xung điều khiển động cơ DC (PWM), khi tăng duty cycle thì:",
+                opts: ["Tốc độ động cơ giảm", "Trị trung bình điện áp đặt lên phần ứng động cơ tăng lên", "Dòng điện tải giảm về 0", "Biên độ xung đỉnh tăng"],
+                ans: 1,
+                exp: "Duty cycle là tỷ lệ thời gian đóng van Ton/T. Duty cycle tăng thì thời gian đóng nguồn dài hơn, dẫn đến điện áp DC trung bình tăng, động cơ quay nhanh hơn."
+            },
+            {
+                q: "Khi thử nghiệm TRIAC mắc nối tiếp với bóng đèn, nếu kích mồi liên tục bằng dòng AC thì hiện tượng là:",
+                opts: ["Đèn sáng với 100% công suất danh định", "Đèn chỉ sáng 1/2 công suất", "Đèn chớp tắt liên tục", "Đèn không sáng"],
+                ans: 0,
+                exp: "Vì TRIAC dẫn cả 2 chiều, nếu mồi liên tục dòng AC thì cả nửa chu kỳ dương và âm đều cho dòng chạy qua bóng đèn, đèn sáng trọn vẹn 100% công suất."
+            },
+            {
+                q: "Tần số đóng cắt cao của linh kiện IGBT/MOSFET mang lại lợi ích kỹ thuật lớn nhất là gì?",
+                opts: ["Tăng kích thước biến áp lõi thép", "Giảm tổn hao chuyển mạch", "Thu nhỏ đáng kể kích thước và trọng lượng các cuộn cảm và tụ lọc", "Triệt tiêu hoàn toàn nhiễu EMI"],
+                ans: 2,
+                exp: "Tần số đóng cắt càng cao thì điện cảm L và điện dung C cần thiết trong bộ lọc thông thấp càng nhỏ, giúp thiết bị biến đổi gọn gàng, nhẹ và thẩm mỹ hơn."
+            },
+            {
+                q: "Thyristor trong mạch xoay chiều AC tự động khóa ngắt vào thời điểm nào?",
+                opts: ["Khi nhiệt độ vượt quá 150°C", "Khi điện áp lưới đổi chiều âm và dòng qua van giảm về 0 (Zero-crossing)", "Khi có xung kích Gate", "Không bao giờ tự ngắt"],
+                ans: 1,
+                exp: "Trong lưới xoay chiều hình sin, khi tín hiệu đi qua điểm 0 (zero-crossing), điện áp đổi dấu âm ép dòng điện tụt dưới mức IH, van tự động khóa lại (ngắt tự nhiên)."
+            },
+            {
+                q: "Sóng hài bậc 3 có tần số là bao nhiêu nếu tần số cơ bản của lưới điện là 50Hz?",
+                opts: ["50Hz", "100Hz", "150Hz", "300Hz"],
+                ans: 2,
+                exp: "Sóng hài bậc n có tần số fn = n × f1. Với lưới 50Hz, sóng hài bậc 3 có tần số bằng: 3 × 50Hz = 150Hz."
+            },
+            {
+                q: "Thiết bị bảo vệ quá tải nào thường đo lường giá trị RMS thay vì giá trị trung bình?",
+                opts: ["Vôn kế khung quay cơ", "Rơ-le nhiệt (Thermal Relay) và khối bảo vệ quá dòng", "Đèn báo LED", "Biến áp đo lường"],
+                ans: 1,
+                exp: "Giá trị hiệu dụng (RMS) phản ánh chính xác hiệu ứng nhiệt nung nóng dây dẫn (Q = Irms² × R × t), do đó rơ-le nhiệt dùng RMS để bảo vệ cháy nổ."
+            },
+            {
+                q: "Bộ lọc thụ động LC / LCL lắp ở đầu ra của bộ nghịch lưu (Inverter) có nhiệm vụ:",
+                opts: ["Tăng điện áp đầu ra", "Làm phẳng và lọc méo dạng sóng hài bậc cao do băm xung PWM", "Đảo góc pha tín hiệu", "Ngăn dòng một chiều DC"],
+                ans: 1,
+                exp: "Bộ lọc LC/LCL đóng vai trò lọc thông thấp, triệt tiêu phổ sóng hài bậc cao do đóng cắt van bán dẫn, trả lại dạng sóng điện áp/dòng điện hình sin mượt mà."
+            },
+            {
+                q: "Trong transistor lưỡng cực BJT, hệ số β (hFE) thể hiện ý nghĩa vật lý nào?",
+                opts: ["Tỷ số giữa dòng Emitter và Base", "Tỷ số khuếch đại dòng tĩnh giữa Collector và Base (IC / IB)", "Tỷ số điện áp giữa Collector và Emitter", "Độ lợi điện áp"],
+                ans: 1,
+                exp: "Hệ số β là tỷ số khuếch đại dòng tĩnh của BJT, xác định mức độ BJT khuếch đại dòng điều khiển cực Base thành dòng tải mạch chính Collector."
+            }
+        ];
+
+        function seededRandom(seed) {
+            const x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function shuffleArray(array, seed) {
+            const arr = [...array];
+            let currentSeed = seed;
+            for (let i = arr.length - 1; i > 0; i--) {
+                currentSeed++;
+                const j = Math.floor(seededRandom(currentSeed) * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        let currentExamId = 1;
+        let currentExamQuestions = [];
+        let userAnswers = {};
+
+        function generateExamSet(examId) {
+            const seed = examId * 9973;
+            const shuffledQIndices = shuffleArray([...Array(questionsBank.length).keys()], seed);
+            
+            return shuffledQIndices.map((qIdx, orderIndex) => {
+                const originalQ = questionsBank[qIdx];
+                const optSeed = seed + orderIndex * 47;
+                
+                const optIndices = shuffleArray([0, 1, 2, 3], optSeed);
+                const shuffledOpts = optIndices.map(i => originalQ.opts[i]);
+                const newAnsIndex = optIndices.indexOf(originalQ.ans);
+
+                return {
+                    id: orderIndex + 1,
+                    q: originalQ.q,
+                    opts: shuffledOpts,
+                    ans: newAnsIndex,
+                    exp: originalQ.exp
+                };
+            });
+        }
+
+        function loadExam(examId) {
+            currentExamId = parseInt(examId);
+            currentExamQuestions = generateExamSet(currentExamId);
+            userAnswers = {};
+
+            const container = document.getElementById('quiz-questions-stream');
+            container.innerHTML = '';
+
+            const letters = ['A', 'B', 'C', 'D'];
+
+            currentExamQuestions.forEach((item, qIdx) => {
+                const card = document.createElement('div');
+                card.className = 'q-card';
+                card.id = `q-card-${qIdx}`;
+
+                const optsHtml = item.opts.map((opt, optIdx) => `
+                    <button class="opt-item" id="opt-${qIdx}-${optIdx}" onclick="selectAnswer(${qIdx}, ${optIdx})">
+                        <span class="opt-letter">${letters[optIdx]}</span>
+                        <span>${opt}</span>
+                    </button>
+                `).join('');
+
+                card.innerHTML = `
+                    <div class="q-bar">
+                        <span class="q-idx"><i class="fa-solid fa-atom"></i> CÂU HỎI ${qIdx + 1} / 50</span>
+                        <span class="q-badge" id="badge-${qIdx}">CHƯA TRẢ LỜI</span>
+                    </div>
+                    <div class="q-text">${item.q}</div>
+                    <div class="options-grid">
+                        ${optsHtml}
+                    </div>
+                    <div class="feedback-box" id="feedback-${qIdx}">
+                        <div class="verdict-line" id="verdict-${qIdx}"></div>
+                        <div class="exp-text"><strong>Giải thích chi tiết:</strong> ${item.exp}</div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            updateHUD();
+            window.scrollTo({ top: 320, behavior: 'smooth' });
+        }
+
+        function selectAnswer(qIdx, selectedOptIdx) {
+            if (userAnswers[qIdx] !== undefined) return;
+
+            const q = currentExamQuestions[qIdx];
+            const isCorrect = (selectedOptIdx === q.ans);
+            userAnswers[qIdx] = { selected: selectedOptIdx, isCorrect };
+
+            const letters = ['A', 'B', 'C', 'D'];
+            const chosenBtn = document.getElementById(`opt-${qIdx}-${selectedOptIdx}`);
+            const correctBtn = document.getElementById(`opt-${qIdx}-${q.ans}`);
+            const feedbackBox = document.getElementById(`feedback-${qIdx}`);
+            const verdictLine = document.getElementById(`verdict-${qIdx}`);
+            const badge = document.getElementById(`badge-${qIdx}`);
+
+            for (let i = 0; i < 4; i++) {
+                document.getElementById(`opt-${qIdx}-${i}`).classList.add('locked');
+            }
+
+            if (isCorrect) {
+                chosenBtn.classList.add('is-correct');
+                verdictLine.className = 'verdict-line correct';
+                verdictLine.innerHTML = `<i class="fa-solid fa-circle-check"></i> CHÍNH XÁC! (Đáp án: ${letters[q.ans]})`;
+                badge.innerText = 'CHÍNH XÁC';
+                badge.style.color = '#00FF88';
+                badge.style.background = 'rgba(0, 255, 136, 0.16)';
+            } else {
+                chosenBtn.classList.add('is-wrong');
+                correctBtn.classList.add('is-correct');
+                verdictLine.className = 'verdict-line wrong';
+                verdictLine.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> CHƯA ĐÚNG! Bạn chọn (${letters[selectedOptIdx]}), Đáp án đúng: (${letters[q.ans]})`;
+                badge.innerText = 'SAI';
+                badge.style.color = '#FF2A42';
+                badge.style.background = 'rgba(255, 42, 66, 0.16)';
+            }
+
+            feedbackBox.classList.add('active');
+            updateHUD();
+
+            if (Object.keys(userAnswers).length === currentExamQuestions.length) {
+                showFinishModal();
+            }
+        }
+
+        function updateHUD() {
+            let correct = 0;
+            let wrong = 0;
+
+            Object.values(userAnswers).forEach(item => {
+                if (item.isCorrect) correct++;
+                else wrong++;
+            });
+
+            const score = ((correct / currentExamQuestions.length) * 10).toFixed(1);
+
+            document.getElementById('hud-correct').innerText = correct;
+            document.getElementById('hud-wrong').innerText = wrong;
+            document.getElementById('hud-score').innerText = score;
+        }
+
+        function resetCurrentExam() {
+            loadExam(currentExamId);
+        }
+
+        function showFinishModal() {
+            let correct = 0;
+            Object.values(userAnswers).forEach(item => {
+                if (item.isCorrect) correct++;
+            });
+            const score = ((correct / currentExamQuestions.length) * 10).toFixed(1);
+
+            document.getElementById('modal-score-display').innerText = `${score} / 10`;
+            document.getElementById('modal-desc').innerHTML = `
+                Bạn đã hoàn thành 50 câu trắc nghiệm của <strong>ĐỀ THI SỐ ${String(currentExamId).padStart(3, '0')}</strong>.<br>
+                Số câu đúng: <strong style="color:#00FF88">${correct}</strong> | Số câu sai: <strong style="color:#FF2A42">${50 - correct}</strong>
+            `;
+            document.getElementById('score-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('score-modal').style.display = 'none';
+        }
+
+        function switchNav(tab) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content-tab').forEach(v => v.classList.remove('active'));
+
+            if (tab === 'quiz') {
+                document.querySelectorAll('.nav-btn')[0].classList.add('active');
+                document.getElementById('quiz-view').classList.add('active');
+            } else {
+                document.querySelectorAll('.nav-btn')[1].classList.add('active');
+                document.getElementById('theory-view').classList.add('active');
+            }
+        }
+
+        window.onload = function() {
+            loadExam(1);
+        };
+    </script>
+</body>
+</html>
